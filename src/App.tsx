@@ -1,76 +1,4 @@
-<<<<<<< HEAD
-import { useState, useEffect } from "react";
-import "./App.css";
-import { supabase } from "./createClient";
-
-// Definisi interface agar TypeScript tidak komplain
-interface Module {
-  id: number;
-  title: string;
-  description: string;
-  video_url: string;
-  xp_reward: number;
-}
-
-function App() {
-  const [modules, setModules] = useState<Module[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    async function fetchModules() {
-      try {
-        setLoading(true);
-        // Mengambil data dari tabel modules yang kamu buat di Supabase
-        const { data, error } = await supabase
-          .from("modules")
-          .select("*");
-
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          setModules(data as Module[]);
-        }
-      } catch (err) {
-        console.error("Gagal mengambil data modul:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchModules();
-  }, []);
-
-  return (
-    <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
-      <h1>Eco-Guardians: Zona Belajar</h1>
-      <hr />
-      
-      {loading ? (
-        <p>Sedang memuat data dari Supabase...</p>
-      ) : (
-        <div>
-          <p>Berhasil membaca <strong>{modules.length}</strong> modul dari database.</p>
-          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginTop: "20px" }}>
-            {modules.map((mod) => (
-              <div key={mod.id} style={{ border: "1px solid #ccc", padding: "15px", borderRadius: "8px", width: "300px" }}>
-                <h3>{mod.title}</h3>
-                <p>{mod.description}</p>
-                <p style={{ color: "green", fontWeight: "bold" }}>+{mod.xp_reward} XP Reward</p>
-                <a href={mod.video_url} target="_blank" rel="noreferrer">Tonton Video</a>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default App;
-=======
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Dashboard from './components/Dashboard';
 import MissionQuiz from './components/MissionQuiz';
 import MissionPhoto from './components/MissionPhoto';
@@ -79,6 +7,7 @@ import PetCare from './components/PetCare';
 import Leaderboard from './components/Leaderboard';
 import { playClick } from './utils/soundEffects';
 import ecoPetImg from './assets/eco_pet.png';
+import { supabase } from './createClient';
 
 type Page = 'dashboard' | 'quiz' | 'photo' | 'game' | 'pet' | 'leaderboard';
 
@@ -99,6 +28,23 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const petName = 'Piko';
+
+  // Efek untuk mengetes/menjalankan koneksi database di background
+  useEffect(() => {
+    async function testConnection() {
+      try {
+        const { data, error } = await supabase.from('modules').select('id').limit(1);
+        if (error) {
+          console.error('[Supabase] Koneksi gagal:', error.message);
+        } else {
+          console.log('[Supabase] Koneksi sukses! Berhasil terhubung ke database Supabase.');
+        }
+      } catch (err) {
+        console.error('[Supabase] Error saat mencoba koneksi:', err);
+      }
+    }
+    testConnection();
+  }, []);
 
   const handleXpGain = useCallback((amount: number) => {
     setXp(prev => {
@@ -380,4 +326,3 @@ export default function App() {
     </>
   );
 }
->>>>>>> 615d58b4c09488369b95d6e89c1dd2e073eb390b
